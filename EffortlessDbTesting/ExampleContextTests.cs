@@ -1,14 +1,12 @@
-﻿using System.Linq;
-using NUnit.Framework;
-using Effort;
-
-
-namespace TestingDbWithoutMuchEffort
+﻿namespace EffortlessDbTesting
 {
     using System.Data.Common;
     using System.Data.Entity;
     using System.Data.SqlClient;
     using Autofac;
+    using System.Linq;
+    using NUnit.Framework;
+    using Effort;
 
     [TestFixture]
     public class ExampleContextTests
