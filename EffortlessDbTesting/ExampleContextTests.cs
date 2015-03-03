@@ -1,5 +1,6 @@
 ﻿namespace EffortlessDbTesting
 {
+    using System.Collections.Generic;
     using System.Data.Common;
     using System.Data.Entity;
     using System.Data.SqlClient;
@@ -20,11 +21,16 @@
             var exampleContext = new ExampleContext(dbConnection);
 
             // when            
-            exampleContext.DbUnicorns.Add(new DbUnicorn { Name = "edward" });
+            exampleContext.DbUnicorns.Add(new DbUnicorn { Name = "edward", UniquePowers = new List<UniquePower>{new UniquePower
+            {
+                Description = "piercing the enemy"
+            }}});
             exampleContext.SaveChanges();
 
             // then
-            Assert.That(exampleContext.DbUnicorns.FirstOrDefault(unicorn => unicorn.Name == "edward"), Is.Not.Null);
+            var dbUnicorn = exampleContext.DbUnicorns.First();
+            Assert.That(dbUnicorn.Name, Is.EqualTo("edward"));
+            Assert.That(dbUnicorn.UniquePowers.First().Description, Is.EqualTo("piercing the enemy"));
         }
 
         [Test]
@@ -58,7 +64,14 @@
         public ExampleContext(DbConnection dbConnection)
             : base(dbConnection, contextOwnsConnection: true)
         {
-            
+            Configuration.LazyLoadingEnabled = false;
+        }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<DbUnicorn>().HasKey(u => u.Id);
+            modelBuilder.Entity<DbUnicorn>().Property(u => u.Name);
+            modelBuilder.Entity<DbUnicorn>().HasMany(u => u.UniquePowers);
         }
     }
 
@@ -66,6 +79,12 @@
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public ICollection<UniquePower> UniquePowers { get; set; }
     }
 
+    public class UniquePower
+    {
+        public int Id { get; set; }
+        public string Description { get; set; }
+    }
 }
